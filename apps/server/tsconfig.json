@@ -1,0 +1,55 @@
+{
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Environment
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    // Path Aliases
+
+    "paths": {
+      "@/*": ["./src/*"],
+      "@config/*": ["./src/config/*"],
+      "@models/*": ["./src/models/*"],
+      "@services/*": ["./src/services/*"],
+      "@controllers/*": ["./src/controllers/*"],
+      "@routes/*": ["./src/routes/*"],
+      "@middlewares/*": ["./src/middlewares/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@validators/*": ["./src/validators/*"]
+    },
+
+    //  Type Checking
+    "strict": true,
+
+    //  Interop with CommonJS
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    //  Performance
+    "skipLibCheck": true,
+
+    // Ensure that file names are treated as case-sensitive on case-insensitive file systems.
+    "forceConsistentCasingInFileNames": true,
+
+    //  Extras
+    "resolveJsonModule": true,
+
+    "types": ["node"],
+
+    // Debugging
+    "sourceMap": true
+
+    //  Build
+    // "declaration": false,
+    // "declarationMap": false
+  },
+
+  "include": ["src/**/*"],
+
+  "exclude": ["node_modules", "dist"]
+}
