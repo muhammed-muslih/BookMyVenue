@@ -20,7 +20,8 @@
       "@routes/*": ["./src/routes/*"],
       "@middlewares/*": ["./src/middlewares/*"],
       "@utils/*": ["./src/utils/*"],
-      "@validators/*": ["./src/validators/*"]
+      "@validators/*": ["./src/validators/*"],
+      "@templates/*": ["./src/templates/*"]
     },
 
     //  Type Checking

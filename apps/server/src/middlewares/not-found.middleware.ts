@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiError } from "@/utils/ApiError";
+import { ApiError } from "@/utils/apiError";
 
 export const notFoundHandler = (
   req: Request,

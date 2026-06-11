@@ -15,14 +15,24 @@ const redis = new Redis(env.REDIS_URL, {
   },
 
   maxRetriesPerRequest: 3,
+
+  lazyConnect: true,
 });
 
-redis.on("connect", () => {
-  logger.info("Redis is connected successfully.");
-});
+export const connectRedis = async () => {
+  try {
+    await redis.connect();
 
-redis.on("error", (err) => {
-  logger.error("Redis error" + err);
+    logger.info("Redis connected successfully.");
+  } catch (error) {
+    logger.error("Failed to connect Redis");
+
+    throw error;
+  }
+};
+
+redis.on("error", (error) => {
+  logger.error({ error }, "Redis error");
 });
 
 // graceful shutdown

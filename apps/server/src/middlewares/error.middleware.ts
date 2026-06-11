@@ -1,5 +1,5 @@
 import { Response, Request, NextFunction } from "express";
-import { ApiError } from "@/utils/ApiError";
+import { ApiError } from "@/utils/apiError";
 import { logger } from "@/config/logger";
 import { env } from "@/config/env";
 

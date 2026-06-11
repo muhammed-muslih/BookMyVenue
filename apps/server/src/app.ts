@@ -3,11 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import compression from "compression";
-import PinoHttp from "pino-http";
 
-import { logger } from "./config/logger";
-import { notFoundHandler } from "./middleware/not-found.middleware";
-import { globalErrorHandler } from "./middleware/error.middleware";
+import { httpLogger } from "@config/httpLogger";
+import { notFoundHandler } from "@middlewares/not-found.middleware";
+import { globalErrorHandler } from "@middlewares/error.middleware";
+import authRoutes from "@routes/auth.route";
 
 const app = express();
 
@@ -17,9 +17,13 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(compression());
-app.use(PinoHttp({ logger }));
+app.use(httpLogger);
 
+app.use("/api/auth", authRoutes);
+
+// 404 handler
 app.use(notFoundHandler);
+
 app.use(globalErrorHandler);
 
 export default app;
