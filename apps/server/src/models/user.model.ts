@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, HydratedDocument } from "mongoose";
 
 export type UserRole = "user" | "owner" | "admin";
 
@@ -113,4 +113,5 @@ userSchema.index({ roles: 1 });
 userSchema.index({ isBlocked: 1 });
 userSchema.index({ deletedAt: 1 });
 
+export type AuthenticatedUser = HydratedDocument<IUser>;
 export const User = model<IUser>("User", userSchema);

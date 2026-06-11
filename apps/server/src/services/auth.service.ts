@@ -162,3 +162,15 @@ export const registerService = async ({
     redirectToOwnerOnboarding: intent === "owner",
   };
 };
+
+export const getCurrentUserService = async (userId: string) => {
+  const user = await User.findById(userId).select(
+    " firstName lastName email avatar roles activeRole isEmailVerified ",
+  );
+
+  if (!user) {
+    throw new ApiError("User not found", 404);
+  }
+
+  return user;
+};

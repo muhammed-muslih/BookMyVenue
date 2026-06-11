@@ -1,13 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "@config/env";
-
-type UserRole = "user" | "owner" | "admin";
-
-export interface JWTPayload {
-  id: string;
-  roles: UserRole[];
-  activeRole: UserRole;
-}
+import { JWTPayload } from "@bookmyvenue/types";
 
 export interface TempJWTPayload {
   identifier: string;

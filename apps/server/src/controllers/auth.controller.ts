@@ -6,8 +6,9 @@ import {
   registerService,
 } from "@/services/auth.service";
 import { env } from "@/config/env";
+import { ApiError } from "@/utils/apiError";
 
-//POST /auth/send-otp
+// POST /auth/send-otp
 export const sendOTP = asyncHandler(async (req: Request, res: Response) => {
   const { identifier, channel } = req.body;
 
@@ -20,7 +21,7 @@ export const sendOTP = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-//POST /auth/verify-otp
+// POST /auth/verify-otp
 export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
   const { identifier, otp } = req.body;
 
@@ -74,3 +75,28 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         : "dashboard",
     });
 });
+
+// GET /auth/me
+export const getCurrentUser = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError("Unauthorized", 401);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: req.user._id.toString(),
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        email: req.user.email,
+        phone: req.user.phone,
+        roles: req.user.roles,
+        activeRole: req.user.activeRole,
+        avatar: req.user.avatar,
+        isEmailVerified: req.user.isEmailVerified,
+        isPhoneVerified: req.user.isPhoneVerified,
+      },
+    });
+  },
+);
