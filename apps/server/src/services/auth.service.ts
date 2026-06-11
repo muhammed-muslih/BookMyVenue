@@ -9,8 +9,16 @@ import { ApiError } from "@/utils/apiError";
 import { sendOTPEmail } from "./email.service";
 import { User, IUser } from "@/models/user.model";
 import { isPhoneNumber } from "@/validators/auth.validator";
-import { signJWT, signTempJWT, verifyTempJWT } from "@/utils/jwt.util";
+import {
+  signJWT,
+  signTempJWT,
+  verifyTempJWT,
+  signRefreshToken,
+  verifyRefreshToken,
+} from "@/utils/jwt.util";
 import { type RegisterInput } from "@/validators/auth.validator";
+import { type VerifyOtpResult } from "@/types/auth";
+import { storeRefreshToken, getRefreshToken } from "./auth.redis.service";
 
 export const sendOtpService = async (
   identifier: string,
@@ -26,11 +34,7 @@ export const sendOtpService = async (
 export const verifyOtpService = async (
   identifier: string,
   otp: string,
-): Promise<{
-  status: "login" | "register";
-  token?: string;
-  tempToken?: string;
-}> => {
+): Promise<VerifyOtpResult> => {
   const result = await validateOtp(identifier, otp);
 
   if (result !== OTPVerificationResult.SUCCESS) {
@@ -46,9 +50,8 @@ export const verifyOtpService = async (
     $or: [{ email: identifier }, { phone: identifier }],
   });
 
+  //existing user -> login
   if (existingUser) {
-    //existing user -> login
-
     if (existingUser.isBlocked) {
       throw new ApiError(
         "Access to your account has been restricted. Please contact support for assistance.",
@@ -85,22 +88,23 @@ export const verifyOtpService = async (
       await existingUser.save();
     }
 
-    const token = signJWT({
+    const accessToken = signJWT({
       id: existingUser._id.toString(),
       roles: existingUser.roles,
       activeRole: existingUser.activeRole,
     });
 
+    const refreshToken = signRefreshToken({ id: existingUser.id });
+    await storeRefreshToken(existingUser.id, refreshToken);
+
     logger.info({ userId: existingUser._id }, "User logged in");
-    return { status: "login", token };
+    return { status: "login", accessToken, refreshToken };
   }
 
   /*
-
    * new user -> issue tempToken.
    * tempToken proves OTP was verified and it's expires in 10 min.
    * frontend sends this tempToken to server for registration.
-
    */
 
   const tempToken = signTempJWT({ identifier, verified: true });
@@ -150,15 +154,19 @@ export const registerService = async ({
 
   const user = await User.create(userData);
 
-  const token = signJWT({
+  const accessToken = signJWT({
     id: user._id.toString(),
     roles: user.roles,
     activeRole: user.activeRole,
   });
 
+  const refreshToken = signRefreshToken({ id: user.id });
+  await storeRefreshToken(user.id, refreshToken);
+
   return {
     user,
-    token,
+    accessToken,
+    refreshToken,
     redirectToOwnerOnboarding: intent === "owner",
   };
 };
@@ -173,4 +181,28 @@ export const getCurrentUserService = async (userId: string) => {
   }
 
   return user;
+};
+
+export const refreshTokenService = async (refreshToken: string) => {
+  const payload = verifyRefreshToken(refreshToken);
+
+  const stored = await getRefreshToken(payload.id);
+
+  if (!stored || stored !== refreshToken) {
+    throw new ApiError("Invalid refresh token", 401);
+  }
+
+  const user = await User.findById(payload.id);
+
+  if (!user) {
+    throw new ApiError("User not found", 401);
+  }
+
+  const accessToken = signJWT({
+    id: user._id.toString(),
+    roles: user.roles,
+    activeRole: user.activeRole,
+  });
+
+  return accessToken;
 };

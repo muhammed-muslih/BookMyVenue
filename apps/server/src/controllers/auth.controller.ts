@@ -4,9 +4,15 @@ import {
   sendOtpService,
   verifyOtpService,
   registerService,
+  refreshTokenService,
 } from "@/services/auth.service";
-import { env } from "@/config/env";
 import { ApiError } from "@/utils/apiError";
+import {
+  setAuthCookies,
+  setAccessTokenCookie,
+  clearAuthCookies,
+} from "@/utils/cookie.util";
+import { deleteRefreshToken } from "@/services/auth.redis.service";
 
 // POST /auth/send-otp
 export const sendOTP = asyncHandler(async (req: Request, res: Response) => {
@@ -30,12 +36,7 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
   if (result.status === "login") {
     // existing user — send token, frontend redirects to dashboard
 
-    res.cookie("accessToken", result.token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
-    });
+    setAuthCookies(res, result.accessToken, result.refreshToken);
 
     res.status(200).json({
       success: true,
@@ -58,22 +59,16 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const result = await registerService(req.body);
 
-  res
-    .cookie("accessToken", result.token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
-    })
-    .status(201)
-    .json({
-      success: true,
-      message: "Account created successfully.",
-      user: result.user,
-      nextStep: result.redirectToOwnerOnboarding
-        ? "owner_onboarding"
-        : "dashboard",
-    });
+  setAuthCookies(res, result.accessToken, result.refreshToken);
+
+  res.status(201).json({
+    success: true,
+    message: "Account created successfully.",
+    user: result.user,
+    nextStep: result.redirectToOwnerOnboarding
+      ? "owner_onboarding"
+      : "dashboard",
+  });
 });
 
 // GET /auth/me
@@ -86,7 +81,7 @@ export const getCurrentUser = asyncHandler(
     res.status(200).json({
       success: true,
       data: {
-        id: req.user._id.toString(),
+        id: req.user.id,
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         email: req.user.email,
@@ -100,3 +95,37 @@ export const getCurrentUser = asyncHandler(
     });
   },
 );
+
+// POST /auth/refresh
+export const refreshToken = asyncHandler(
+  async (req: Request, res: Response) => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      throw new ApiError("Refresh token missing", 401);
+    }
+
+    const accessToken = await refreshTokenService(refreshToken);
+
+    setAccessTokenCookie(res, accessToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Token refreshed",
+    });
+  },
+);
+
+//POST /auth/logout
+export const logout = asyncHandler(async (req: Request, res: Response) => {
+  if (req.user) {
+    await deleteRefreshToken(req.user.id);
+  }
+
+  clearAuthCookies(res);
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out",
+  });
+});

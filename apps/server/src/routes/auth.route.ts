@@ -5,6 +5,8 @@ import {
   verifyOTP,
   register,
   getCurrentUser,
+  refreshToken,
+  logout,
 } from "@/controllers/auth.controller";
 import {
   sendOtpSchema,
@@ -18,6 +20,8 @@ const router = Router();
 router.post("/send-otp", validate(sendOtpSchema), sendOTP);
 router.post("/verify-otp", validate(verifyOtpSchema), verifyOTP);
 router.post("/register", validate(registerValidationSchema), register);
+router.post("/refresh", refreshToken);
 router.get("/me", authenticate, getCurrentUser);
+router.post("/logout", authenticate, logout);
 
 export default router;
