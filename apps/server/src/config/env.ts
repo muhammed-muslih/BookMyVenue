@@ -43,6 +43,8 @@ const envSchema = z.object({
   SMTP_PASS: z.string(),
 
   SMTP_FROM: z.string().default("BookMyVenue <noreply@bookmyvenue.in>"),
+
+  ADMIN_EMAIL: z.email(),
 });
 
 export const env = envSchema.parse(process.env);

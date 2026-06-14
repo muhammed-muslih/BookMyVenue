@@ -139,10 +139,13 @@ export const registerService = async ({
   const userData: Partial<IUser> = {
     firstName: firstName.trim(),
     lastName: lastName.trim(),
-    dob: new Date(dob),
     roles: ["user"],
     activeRole: "user",
   };
+
+  if (dob) {
+    userData.dob = new Date(dob);
+  }
 
   if (isPhoneNumber(identifier)) {
     userData.phone = identifier;

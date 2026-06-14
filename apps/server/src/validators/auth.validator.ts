@@ -67,7 +67,8 @@ export const registerSchema = z.object({
         (1000 * 60 * 60 * 24 * 365.25);
 
       return age >= 13;
-    }, "You must be at least 13 years old"),
+    }, "You must be at least 13 years old")
+    .optional(),
 
   intent: z.enum(["user", "owner"]).optional(),
 });

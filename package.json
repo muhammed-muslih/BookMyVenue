@@ -11,6 +11,7 @@
     "dev:server": "npm run dev --workspace=apps/server",
     "dev:web": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspace --if-present",
-    "format": "npm run format --workspaces --if-present"
+    "format": "npm run format --workspaces --if-present",
+    "bootstrap-admin": "npm run bootstrap-admin --workspace=apps/server"
   }
 }

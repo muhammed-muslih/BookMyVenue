@@ -11,7 +11,7 @@ export interface IUser {
   googleId?: string;
 
   avatar?: string;
-  dob: Date;
+  dob?: Date;
 
   roles: UserRole[];
   activeRole: UserRole;
@@ -71,7 +71,7 @@ const userSchema = new Schema<IUser>(
 
     dob: {
       type: Date,
-      required: true,
+      required: false,
     },
 
     roles: {
