@@ -17,7 +17,7 @@ import {
   verifyRefreshToken,
 } from "@/utils/jwt.util";
 import { type RegisterInput } from "@/validators/auth.validator";
-import { type VerifyOtpResult } from "@/types/auth";
+import { type VerifyOtpResult } from "@/types/auth.types";
 import { storeRefreshToken, getRefreshToken } from "./auth.redis.service";
 
 export const sendOtpService = async (
@@ -94,8 +94,8 @@ export const verifyOtpService = async (
       activeRole: existingUser.activeRole,
     });
 
-    const refreshToken = signRefreshToken({ id: existingUser.id });
-    await storeRefreshToken(existingUser.id, refreshToken);
+    const refreshToken = signRefreshToken({ id: existingUser._id.toString() });
+    await storeRefreshToken(existingUser._id.toString(), refreshToken);
 
     logger.info({ userId: existingUser._id }, "User logged in");
     return { status: "login", accessToken, refreshToken };
@@ -160,8 +160,8 @@ export const registerService = async ({
     activeRole: user.activeRole,
   });
 
-  const refreshToken = signRefreshToken({ id: user.id });
-  await storeRefreshToken(user.id, refreshToken);
+  const refreshToken = signRefreshToken({ id: user._id.toString() });
+  await storeRefreshToken(user._id.toString(), refreshToken);
 
   return {
     user,

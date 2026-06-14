@@ -81,7 +81,7 @@ export const getCurrentUser = asyncHandler(
     res.status(200).json({
       success: true,
       data: {
-        id: req.user.id,
+        id: req.user._id.toString(),
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         email: req.user.email,

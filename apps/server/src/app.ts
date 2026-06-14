@@ -8,6 +8,7 @@ import { httpLogger } from "@config/httpLogger";
 import { notFoundHandler } from "@middlewares/not-found.middleware";
 import { globalErrorHandler } from "@middlewares/error.middleware";
 import authRoutes from "@routes/auth.route";
+import venueRoutes from "@/routes/venue.routes";
 
 const app = express();
 
@@ -19,7 +20,9 @@ app.use(express.json());
 app.use(compression());
 app.use(httpLogger);
 
+//routes
 app.use("/api/auth", authRoutes);
+app.use("/api/venues", venueRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
