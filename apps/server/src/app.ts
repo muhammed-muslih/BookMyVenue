@@ -9,6 +9,8 @@ import { notFoundHandler } from "@middlewares/not-found.middleware";
 import { globalErrorHandler } from "@middlewares/error.middleware";
 import authRoutes from "@routes/auth.route";
 import venueRoutes from "@/routes/venue.routes";
+import ownerRoutes from "@/routes/owner.route";
+import adminRoutes from "@/routes/admin.routes";
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use(httpLogger);
 //routes
 app.use("/api/auth", authRoutes);
 app.use("/api/venues", venueRoutes);
+app.use("/api/owners", ownerRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 404 handler
 app.use(notFoundHandler);

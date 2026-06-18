@@ -1,4 +1,4 @@
-import Router from "express";
+import { Router } from "express";
 import { validate } from "@/middlewares/validate.middleware";
 import { authorize } from "@/middlewares/authorize.middleware";
 import { authenticate } from "@/middlewares/auth.middleware";
