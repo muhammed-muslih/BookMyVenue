@@ -21,7 +21,8 @@
       "@middlewares/*": ["./src/middlewares/*"],
       "@utils/*": ["./src/utils/*"],
       "@validators/*": ["./src/validators/*"],
-      "@templates/*": ["./src/templates/*"]
+      "@templates/*": ["./src/templates/*"],
+      "@helpers/*": ["./src/helpers/*"]
     },
 
     //  Type Checking

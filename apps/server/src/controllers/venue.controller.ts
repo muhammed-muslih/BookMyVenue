@@ -63,14 +63,14 @@ export const getVenueById = asyncHandler(
 
 //PATCH /venues/:id
 export const updateVenue = asyncHandler(async (req: Request, res: Response) => {
-  const id = req.params.id as string;
+  const venue = req.venue!;
 
-  const venue = await updateVenueService(id, req.body);
+  const updatedVenue = await updateVenueService(venue, req.body);
 
   res.status(200).json({
     success: true,
-    message: "Venue updated successfully.",
-    data: venue,
+    message: updatedVenue.message,
+    data: updatedVenue,
   });
 });
 

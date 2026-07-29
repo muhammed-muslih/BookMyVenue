@@ -10,42 +10,27 @@ import {
 import {
   createVenue,
   getMyVenues,
-  getVenueById,
   updateVenue,
   deleteVenue,
 } from "@/controllers/venue.controller";
 
 const router = Router();
 
-//protected routes
-router.post(
-  "/",
-  authenticate,
-  authorize("owner"),
-  validate(createVenueValidationSchema),
-  createVenue,
-);
+router.use(authenticate);
+router.use(authorize("owner"));
 
-router.get("/my-venues", authenticate, authorize("owner"), getMyVenues);
+//protected routes
+router.post("/", validate(createVenueValidationSchema), createVenue);
+
+router.get("/my-venues", getMyVenues);
 
 router.patch(
   "/:id",
-  authenticate,
-  authorize("owner"),
   verifyVenueOwnership,
   validate(updateVenueValidationSchema),
   updateVenue,
 );
 
-router.delete(
-  "/:id",
-  authenticate,
-  authorize("owner"),
-  verifyVenueOwnership,
-  deleteVenue,
-);
-
-// public routes
-router.get("/:id", getVenueById);
+router.delete("/:id", verifyVenueOwnership, deleteVenue);
 
 export default router;

@@ -15,3 +15,9 @@ export enum VenueApprovalStatus {
   REJECTED = "rejected",
   SUSPENDED = "suspended",
 }
+
+export enum VenueDraftStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+}

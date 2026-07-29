@@ -110,6 +110,27 @@ const venueSchema = new Schema<IVenue>(
       default: VenueApprovalStatus.PENDING,
     },
 
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+
+    approvedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    resubmissionCount: {
+      type: Number,
+      default: 0,
+    },
+
     deletedAt: {
       type: Date,
       default: null,

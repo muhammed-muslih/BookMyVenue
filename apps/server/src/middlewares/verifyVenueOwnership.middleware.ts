@@ -23,5 +23,7 @@ export const verifyVenueOwnership = async (
     throw new ApiError("You are not authorized to modify this venue.", 403);
   }
 
+  req.venue = venue;
+
   next();
 };

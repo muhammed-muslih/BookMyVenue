@@ -55,8 +55,8 @@ export const createVenueValidationSchema = z.object({
 
 export const updateCapacitySchema = z
   .object({
-    min: z.number().int().positive().optional(),
-    max: z.number().int().positive().optional(),
+    min: z.number().int().positive(),
+    max: z.number().int().positive(),
   })
   .refine(
     (data) =>

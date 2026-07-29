@@ -2,7 +2,10 @@ import { Venue } from "@/models/venue.model";
 import { CreateVenueDTO, UpdateVenueDTO } from "@/validators/venue.validator";
 import { ApiError } from "@/utils/apiError";
 import { Types } from "mongoose";
-import { flattenObject } from "@/utils/flattenObject";
+import { VenueDocument } from "@/types/venue.types";
+import { upsertVenueDraft } from "./venueDraft.service";
+import { VenueApprovalStatus } from "@bookmyvenue/types";
+import { applyVenueChanges } from "@/helpers/venue.helper";
 
 export const createVenueService = async (
   ownerId: string,
@@ -10,13 +13,14 @@ export const createVenueService = async (
 ) => {
   const existingVenue = await Venue.findOne({
     owner: ownerId,
+    name: payload.name,
     address: payload.address,
     city: payload.city,
     deletedAt: null,
   });
 
   if (existingVenue) {
-    throw new ApiError("A venue already exists at this address.", 409);
+    throw new ApiError("A venue already exists at this name and address.", 409);
   }
 
   const venue = await Venue.create({
@@ -29,6 +33,7 @@ export const createVenueService = async (
 
 export const getVenueByIdService = async (venueId: string) => {
   const venue = await Venue.findOne({ _id: venueId, deletedAt: null }).lean();
+  console.log(venue);
 
   if (!venue) {
     throw new ApiError("Venue not found.", 404);
@@ -62,22 +67,45 @@ export const getOwnerVenuesService = async (
 };
 
 export const updateVenueService = async (
-  venueId: string,
+  venue: VenueDocument,
   payload: UpdateVenueDTO,
 ) => {
-  const updateData = flattenObject(payload);
+  if (venue.approvalStatus === VenueApprovalStatus.APPROVED) {
+    const draft = await upsertVenueDraft(venue, payload);
 
-  const venue = await Venue.findOneAndUpdate(
-    { _id: venueId, deletedAt: null },
-    { $set: updateData },
-    { new: true, runValidators: true },
-  );
-
-  if (!venue) {
-    throw new ApiError("Venue not found.", 404);
+    return {
+      message: "Venue changes submitted for approval.",
+      draft,
+    };
   }
 
-  return venue;
+  if (venue.approvalStatus === VenueApprovalStatus.REJECTED) {
+    applyVenueChanges(venue, payload);
+
+    venue.approvalStatus = VenueApprovalStatus.PENDING;
+    venue.rejectionReason = null;
+    venue.resubmissionCount += 1;
+
+    await venue.save();
+
+    return {
+      message: "Venue resubmitted for review.",
+      venue,
+    };
+  }
+
+  if (venue.approvalStatus === VenueApprovalStatus.PENDING) {
+    applyVenueChanges(venue, payload);
+
+    await venue.save();
+
+    return {
+      message: "Venue updated successfully.",
+      venue,
+    };
+  }
+
+  throw new ApiError("This venue cannot be updated in its current state.", 403);
 };
 
 export const deleteVenueService = async (venueId: string) => {
